@@ -5,7 +5,7 @@
 
 static volatile unsigned char heart[9];
 static unsigned char column=0;
-static unsigned char i,ii,j;
+static unsigned char i,t,j;
 
 // наборы состояния матрицы
 unsigned char KONTUR[9] =     { 0x0e, 0x11, 0x21, 0x41, 0x82, 0x41, 0x21, 0x11, 0x0e };
@@ -29,14 +29,14 @@ void led_off (unsigned char x, unsigned char y) {
 }
 
 // выключение всех светодиодов
-void clear_displ() {
+void clear_displ(void) {
 	PORTD = 0x00;
 	for(i = 0; i<9; ++i)
 		heart[i]=0x00;
 }
 
 // эффект "плавное затухание"
-void effect_plavno_down () {
+void effect_plavno_down (void) {
   OCR2=0xff;
   TIMSK=(1<<OCIE2) | (1<<TOIE2);
   while (OCR2!=0) {
@@ -50,7 +50,7 @@ void effect_plavno_down () {
 }
 
 // эффект "Подготовка" (несколько раз моргает центральный светодиод)
-void effect_start () {
+void effect_start (void) {
 	led_on (4,3);	_delay_ms(500);
 	led_off (4,3);	_delay_ms(250);
 	led_on (4,3);	_delay_ms(500);
@@ -60,51 +60,51 @@ void effect_start () {
 }
 
 // эффект "контур" (загораются светодиоды только по контуру)
-void effect_kontur() {
+void effect_kontur(void) {
 	for (i = 0; i < 9; ++i)
 		heart[i] = KONTUR[i];
 	_delay_ms(2000);
 }
 
 // эффект "горизонтальные линии" (горизонтальные линии падают как в тетрисе)
-void effect_hor_line() {
+void effect_hor_line(void) {
 	for (i = 0; i <= 7; ++i)
-		for (ii = 0; ii <= 7 - i; ++ii) {
+		for (t = 0; t <= 7 - i; ++t) {
 			for (j = 0; j <= 8; ++j)
-				led_on (j,ii);
+				led_on (j,t);
 			_delay_ms(50);
-			if (ii < 7 - i)
+			if (t < 7 - i)
 				for (j = 0; j <= 8; ++j)
-					led_off(j,ii);
+					led_off(j,t);
 		}
 	_delay_ms(1000);
-	for (ii = 0; ii <= 7; ++ii) {
+	for (t = 0; t <= 7; ++t) {
 		for (j = 0; j <= 8; ++j)
-			led_off (j,ii);
+			led_off (j,t);
 		_delay_ms(50);
 	}
 }
 
 // эффект "вертикальные линии" (вертикальные  линии сдвигаются как жалюзи)
-void effect_vert_line() {
+void effect_vert_line(void) {
 	for (i = 0; i <= 4; ++i)
-		for (ii = 0; ii <= 4 - i; ++ii) {
+		for (t = 0; t <= 4 - i; ++t) {
 			for (j = 0; j <= 7; ++j) {
-				led_on (ii,j);
-				led_on (8-ii,j);
+				led_on (t,j);
+				led_on (8-t,j);
 			}
 			_delay_ms(50);
-			if (ii < 4 - i)
+			if (t < 4 - i)
 				for (j = 0; j <= 7; ++j) {
-					led_off(ii,j);
-					led_off(8-ii,j);
+					led_off(t,j);
+					led_off(8-t,j);
 				}
 		}
 	_delay_ms(1000);
-	for (ii = 0; ii <= 4; ++ii) {
+	for (t = 0; t <= 4; ++t) {
 		for (j = 0; j <= 7; ++j) {
-			led_off (4-ii,j);
-			led_off (4+ii,j);
+			led_off (4-t,j);
+			led_off (4+t,j);
 		}
 		_delay_ms(50);
 	}
@@ -139,7 +139,7 @@ void effect_heart_letter(unsigned char *letter) {
 }
 
 // эффект "имя" (вызывается эффект "буква" для разного набора букв)
-void effect_name() {
+void effect_name(void) {
   effect_heart_letter(N_LETTER);
   effect_heart_letter(I_LETTER);
   effect_heart_letter(N_LETTER);
@@ -148,7 +148,7 @@ void effect_name() {
 
 // эффект "стук сердца"
 void effect_tuk(unsigned char num) {
-	for (ii=0;ii<num;++ii) {
+	for (t=0;t<num;++t) {
 /*		for (i = 0; i < 9; ++i)
 			heart[i] = MIN_HEART[i];
 		_delay_ms(100);*/
@@ -172,7 +172,7 @@ void effect_tuk(unsigned char num) {
 }
 
 // основная программа
-void main(void) {
+int main(void) {
 	DDRB = PORTB = 0x3e;
 	DDRC = PORTC = 0x0f;
 	DDRD = PORTD = 0xff;
